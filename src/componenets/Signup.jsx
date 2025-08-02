@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 
 
 function Signup() {
+
   const [form, setForm] = useState({
     username: '',
     email: '',
     password: '',
     phone: ''
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -23,6 +25,7 @@ function Signup() {
     setLoading(true);
     setError('');
     setSuccess('');
+    
     // Basic validation
     if (!form.username || !form.email || !form.password || !form.phone) {
       setError('All fields are required.');
