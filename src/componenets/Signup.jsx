@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { toast } from 'react-toastify';
 
 function Signup() {
 
@@ -40,8 +40,9 @@ function Signup() {
       });
       if (res.ok) {
         setSuccess('Registration successful!');
+        toast.success('Success!');
         setForm({ username: '', email: '', password: '', phone: '' });
-        Navigate('/login');
+       Navigate('/login')
       } else {
         const data = await res.json();
         setError(
@@ -49,9 +50,12 @@ function Signup() {
             ? Object.values(data).join(' ')
             : 'Registration failed.'
         );
+        toast.error('Network error.');
+
       }
     } catch (err) {
       setError('Network error.');
+      toast.error('Network error.');
     }
     setLoading(false);
   };
