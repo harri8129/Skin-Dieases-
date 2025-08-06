@@ -4,6 +4,7 @@ import {
   UserAddOutlined, LoginOutlined, UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, CloseOutlined
 } from '@ant-design/icons';
 import { toast } from 'react-toastify';
+import { Navigate } from 'react-router-dom';
 
 export default function AuthModal({ open, mode, onClose, onSuccess, switchMode }) {
   // mode: 'login' or 'register'
@@ -78,11 +79,24 @@ export default function AuthModal({ open, mode, onClose, onSuccess, switchMode }
         });
         const data = await res.json();
         if (res.ok) {
+          // ✅ Check data.user has id and name
+          if (data.user && data.user.id && data.user.username) {
+            localStorage.setItem('user', JSON.stringify({
+              id: data.user.id,
+              name: data.user.username
+            }));
+          } else {
+            toast.error("Login response missing user ID or name");
+            return;
+          }
+        
           notification.success({ message: 'Login successful!' });
           form.resetFields();
           onSuccess && onSuccess('login', data.user);
-          toast.success("login succesfull")
-        } else {
+          toast.success("Login successful");
+        }
+          
+        else {
           let errorMessage = 'Login failed. Please check your credentials.';
           if (data && data.error) errorMessage = data.error;
           notification.error({ message: 'Login Failed', description: errorMessage });

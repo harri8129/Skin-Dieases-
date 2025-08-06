@@ -1,15 +1,12 @@
 import { useNavigate } from 'react-router-dom';
-import Navbar from './Navbar.jsx';
+import Navbar from '../Navbar.jsx';
 import { toast } from 'react-toastify';
 import { useEffect } from 'react';
 
 function LandingPage() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    toast.info('Hello 👋', { theme: 'colored' });
-  }, []);
-
+  
   const handleGetStarted = () => {
     navigate('/signup');
   };
