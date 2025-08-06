@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Userdetails
 from django.contrib.auth.hashers import make_password
+from.models import UserImage
 
 
 class UserdetailsSerializer(serializers.ModelSerializer):
@@ -33,3 +34,7 @@ class UserdetailsSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
         
 
+class UserImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserImage
+        fields = ['id', 'user', 'image', 'uploaded_at']
