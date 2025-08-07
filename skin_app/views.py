@@ -4,10 +4,9 @@ from rest_framework.response import Response
 from django.contrib.auth.hashers import check_password
 from django.db import models
 from django.shortcuts import get_object_or_404
-
 from .models import Userdetails, UserImage
 from .serializers import UserdetailsSerializer, UserImageSerializer
-
+from .ml_models.ml_model import predict_disease 
 
 class UserdetailsViewSet(viewsets.ModelViewSet):
     queryset = Userdetails.objects.all()
@@ -60,8 +59,7 @@ class UserImageViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], url_path='upload')
     def upload(self, request):
         """
-        Upload an image for a user.
-        Requires 'user' (user ID) and 'image' (file) in request.
+        Upload an image and predict skin disease.
         """
         user_id = request.data.get('user')
         image_file = request.FILES.get('image')
@@ -72,15 +70,26 @@ class UserImageViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Check user
         try:
             user = Userdetails.objects.get(id=user_id)
         except Userdetails.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        # Save image to model
         user_image = UserImage.objects.create(user=user, image=image_file)
-        serializer = self.get_serializer(user_image)
 
+        # Predict disease
+        image_path = user_image.image.path
+        predicted_disease = predict_disease(image_path)
+
+        # Save prediction to DB (assuming your model has this field)
+        user_image.predicted_disease = predicted_disease
+        user_image.save()
+
+        serializer = self.get_serializer(user_image)
         return Response({
-            'message': 'Image uploaded successfully',
+            'message': 'Image uploaded and disease predicted',
+            'predicted_disease': predicted_disease,
             'image': serializer.data
         }, status=status.HTTP_201_CREATED)
