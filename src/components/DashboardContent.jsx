@@ -6,6 +6,10 @@ const DashboardContent = () => {
   const [uploadStatus, setUploadStatus] = useState('');
   const [previewUrl, setPreviewUrl] = useState(null);
   const [prediction, setPrediction] = useState(null);
+  const [confidence, setConfidence] = useState(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
+
+
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -48,22 +52,17 @@ const DashboardContent = () => {
           setUploadStatus('✅ Image uploaded successfully!');
           setSelectedFile(null);
           setPreviewUrl(null); // Clear preview after upload
-  
-          if (data.predicted_disease) {
-            setPrediction(data.predicted_disease);
-          } else if (data.image && data.image.predicted_disease) {
-            setPrediction(data.image.predicted_disease);
-          } else {
-            setPrediction('Prediction not available');
-          }
         
-          console.log('Upload Response:', data);
+          const disease = data.predicted_disease;
+          const conf = data.confidence;
+          const imageURL = data.image?.image_url;
+        
+          setPrediction(disease || 'Prediction not available');
+          setConfidence(conf !== undefined ? conf.toFixed(2) : null); // Already percentage
+          setUploadedImageUrl(imageURL || null);
         } else {
           setUploadStatus(`❌ Upload failed: ${data.error || 'Unknown error'}`);
         }
-      } else {
-        setUploadStatus('❌ Server error: Unexpected response format.');
-        console.error('Expected JSON but got:', await response.text());
       }
     } catch (err) {
       setUploadStatus(`❌ Upload failed: ${err.message}`);
@@ -113,17 +112,33 @@ const DashboardContent = () => {
           )}
         </div>
 
+        {/* Result Card */}
         <div className="bg-white rounded-lg p-6 shadow">
-            <h2 className="text-xl font-semibold mb-2">Last Diagnosis</h2>
-            {prediction ? (
+          <h2 className="text-xl font-semibold mb-2">Last Diagnosis</h2>
+
+          {prediction ? (
+            <>
+              {uploadedImageUrl && (
+                <img
+                  src={uploadedImageUrl}
+                  alt="Uploaded"
+                  className="w-48 h-48 object-cover border rounded mb-4"
+                />
+              )}
               <p className="text-green-700 font-medium">
                 🧬 Predicted Disease: <strong>{prediction}</strong>
               </p>
-            ) : (
-              <p className="text-gray-600">No recent results found.</p>
-            )}
-        </div>
+              {confidence && (
+                <p className="text-blue-600 mt-2">
+                  🔬 Confidence: <strong>{confidence}%</strong>
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-gray-600">No recent results found.</p>
+          )}
       </div>
+    </div>
     </div>
   );
 };

@@ -51,7 +51,7 @@ function App() {
         }
       />
 
-      <ToastContainer position="top-center" autoClose={3000} />
+      <ToastContainer position="bottom-right" autoClose={1000} theme="colored" />
     </>
   );
 }
