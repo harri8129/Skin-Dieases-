@@ -8,8 +8,8 @@ const DashboardContent = () => {
   const [prediction, setPrediction] = useState(null);
   const [confidence, setConfidence] = useState(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
-
-
+  const [llmDetails, setLlmDetails] = useState(null);
+  const [isLoadingLLM, setIsLoadingLLM] = useState(false);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -43,7 +43,8 @@ const DashboardContent = () => {
         method: 'POST',
         body: formData
       });
-  
+
+
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
@@ -56,10 +57,30 @@ const DashboardContent = () => {
           const disease = data.predicted_disease;
           const conf = data.confidence;
           const imageURL = data.image?.image_url;
+          const uploadedImageId = data.image?.id;
         
           setPrediction(disease || 'Prediction not available');
           setConfidence(conf !== undefined ? conf.toFixed(2) : null); // Already percentage
           setUploadedImageUrl(imageURL || null);
+          
+          setIsLoadingLLM(true);  //START LOADING
+            // Now call LLM generate-info
+          const llmRes = await fetch(`http://localhost:8000/api/disease-info/${uploadedImageId}/generate-info/`, {
+              method: 'POST'
+            });
+          const llmData = await llmRes.json();
+            
+          setIsLoadingLLM(false); //stop loading
+
+            if (llmRes.ok) {
+              setLlmDetails({
+                symptoms: llmData.data.symptoms,
+                remedies: llmData.data.remedies,
+                cure: llmData.data.cure,
+                prevention: llmData.data.prevention
+              });
+            }       
+
         } else {
           setUploadStatus(`❌ Upload failed: ${data.error || 'Unknown error'}`);
         }
@@ -139,6 +160,28 @@ const DashboardContent = () => {
           )}
       </div>
     </div>
+
+            {/* LLM Details Section */}
+      {isLoadingLLM && (
+        <div className="bg-white rounded-lg p-6 shadow mt-6 text-center">
+          <div className="flex justify-center items-center space-x-2">
+            <div className="w-5 h-5 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-600">Generating AI-based report...</p>
+          </div>
+        </div>
+      )}
+
+      {!isLoadingLLM && llmDetails && (
+        <div className="bg-white rounded-lg p-6 shadow mt-6">
+          <h2 className="text-xl font-semibold mb-4">AI-Generated Disease Information</h2>
+          <p><strong>🧬 Disease:</strong> {prediction}</p>
+          <p><strong>🩺 Symptoms:</strong> {llmDetails.symptoms}</p>
+          <p><strong>💊 Remedies:</strong> {llmDetails.remedies}</p>
+          <p><strong>✅ Cure:</strong> {llmDetails.cure}</p>
+          <p><strong>🛡 Prevention:</strong> {llmDetails.prevention}</p>
+        </div>
+      )}
+
     </div>
   );
 };
