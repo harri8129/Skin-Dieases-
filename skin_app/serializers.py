@@ -35,6 +35,17 @@ class UserdetailsSerializer(serializers.ModelSerializer):
         
 
 class UserImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = UserImage
-        fields = ['id', 'user', 'image', 'uploaded_at']
+        fields = ['id', 'user', 'image', 'uploaded_at','predicted_confidence','image_url','symptoms',
+            'remedies',
+            'cure',
+            'prevention',]
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.image and hasattr(obj.image, 'url'):
+            return request.build_absolute_uri(obj.image.url)
+        return None 

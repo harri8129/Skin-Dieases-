@@ -1,5 +1,10 @@
 venv/
-__pycache__/
+.env*
+skin_app/__pycache__/*
+Skin_project/__pycache__/*
+Backend/Skin_project/skin_app/__pycache__/*
+Backend/Skin_project/Skin_project/__pycache__/*
+
 *.pyc
 *.pyo
 *.pyd
@@ -8,4 +13,6 @@ __pycache__/
 *.pywz
 *.pyzw
 *.pyzwz
-*.pyzwzw
+*.pyzwzwme
+
+media/uploads*

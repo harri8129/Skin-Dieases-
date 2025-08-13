@@ -5,7 +5,7 @@ from PIL import Image
 import cv2
 from django.conf import settings
 
-# === Absolute path to your model using BASE_DIR ===
+# path used to find models path 
 MODEL_PATH = os.path.join(settings.BASE_DIR, 'skin_app', 'ml_models', 'skin_model.h5')
 model = tf.keras.models.load_model(MODEL_PATH)
 
@@ -42,11 +42,13 @@ def predict_disease(image_path):
         img = img / 255.0
         img = img.reshape(1, *input_shape)
 
-        # Predict
-        prediction = model.predict(img)
-        predicted_index = np.argmax(prediction, axis=1)[0]
+        #  Predict
+        prediction = model.predict(img)[0]
+        predicted_index = np.argmax(prediction)
+        confidence = round(float(prediction[predicted_index]) * 100, 2)
 
-        return LABELS.get(predicted_index, 'Unknown')
+        predicted_label = LABELS.get(predicted_index, 'Unknown')
+        return predicted_label, confidence
     except Exception as e:
         print(f"Prediction error: {e}")
-        return 'Prediction Error'
+        return 'Prediction Error', 0.0
