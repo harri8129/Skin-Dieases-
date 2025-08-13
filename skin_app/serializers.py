@@ -39,7 +39,7 @@ class UserImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserImage
-        fields = ['id', 'user', 'image', 'uploaded_at','predicted_confidence','image_url','symptoms',
+        fields = ['id', 'user', 'image', 'uploaded_at','predicted_disease','predicted_confidence','image_url','symptoms',
             'remedies',
             'cure',
             'prevention',]
