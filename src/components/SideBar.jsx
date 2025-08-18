@@ -12,10 +12,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { name: 'Home', icon: <Home size={20} />, path: '/dashboard' },
-    { name: 'Upload', icon: <Upload size={20} />, path: '/upload' },
     { name: 'History', icon: <History size={20} />, path: '/history' },
-    { name: 'Insights', icon: <BarChart size={20} />, path: '/insights' },
-    { name: 'Help', icon: <HelpCircle size={20} />, path: '/help' },
   ];
 
   return (

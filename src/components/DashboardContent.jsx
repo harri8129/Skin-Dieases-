@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const DashboardContent = () => {
-  const user = JSON.parse(localStorage.getItem('user')) || { name: 'User', id: null };
+  const user = JSON.parse(localStorage.getItem('user')) || { username: 'User', id: null };
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState('');
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -10,6 +10,8 @@ const DashboardContent = () => {
   const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
   const [llmDetails, setLlmDetails] = useState(null);
   const [isLoadingLLM, setIsLoadingLLM] = useState(false);
+  
+
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -24,27 +26,21 @@ const DashboardContent = () => {
 
 
   const handleUpload = async () => {
-    if (!user.id) {
-      setUploadStatus('❌ User ID not found. Please log in again.');
-      return;
-    }
-  
     if (!selectedFile) {
       setUploadStatus('⚠️ Please select an image first.');
       return;
     }
   
     const formData = new FormData();
-    formData.append('user', user.id);           // Send user ID
-    formData.append('image', selectedFile);     // Send image file
+    formData.append('image', selectedFile); // ✅ only send the image
   
     try {
       const response = await fetch('http://localhost:8000/api/userimages/upload/', {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: 'include', // ✅ send session cookie
       });
-
-
+  
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
         const data = await response.json();
@@ -52,35 +48,37 @@ const DashboardContent = () => {
         if (response.ok) {
           setUploadStatus('✅ Image uploaded successfully!');
           setSelectedFile(null);
-          setPreviewUrl(null); // Clear preview after upload
-        
+          setPreviewUrl(null);
+  
           const disease = data.predicted_disease;
           const conf = data.confidence;
-          const imageURL = data.image?.image_url;
           const uploadedImageId = data.image?.id;
-        
+  
           setPrediction(disease || 'Prediction not available');
-          setConfidence(conf !== undefined ? conf.toFixed(2) : null); // Already percentage
-          setUploadedImageUrl(imageURL || null);
-          
-          setIsLoadingLLM(true);  //START LOADING
-            // Now call LLM generate-info
-          const llmRes = await fetch(`http://localhost:8000/api/disease-info/${uploadedImageId}/generate-info/`, {
-              method: 'POST'
-            });
+          setConfidence(conf !== undefined ? conf.toFixed(2) : null);
+          setUploadedImageUrl(data.image?.image || null);
+  
+          // Call LLM info generator
+          setIsLoadingLLM(true);
+          const llmRes = await fetch(
+            `http://localhost:8000/api/disease-info/${uploadedImageId}/generate-info/`,
+            {
+              method: 'POST',
+              credentials: 'include', // ✅ send cookie again
+            }
+          );
+  
           const llmData = await llmRes.json();
-            
-          setIsLoadingLLM(false); //stop loading
-
-            if (llmRes.ok) {
-              setLlmDetails({
-                symptoms: llmData.data.symptoms,
-                remedies: llmData.data.remedies,
-                cure: llmData.data.cure,
-                prevention: llmData.data.prevention
-              });
-            }       
-
+          setIsLoadingLLM(false);
+  
+          if (llmRes.ok) {
+            setLlmDetails({
+              symptoms: llmData.data.symptoms,
+              remedies: llmData.data.remedies,
+              cure: llmData.data.cure,
+              prevention: llmData.data.prevention,
+            });
+          }
         } else {
           setUploadStatus(`❌ Upload failed: ${data.error || 'Unknown error'}`);
         }
@@ -89,12 +87,11 @@ const DashboardContent = () => {
       setUploadStatus(`❌ Upload failed: ${err.message}`);
     }
   };
-  
 
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-800 mb-4">
-        Welcome, {user.name}
+         Welcome, {user.username}
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute.jsx';
 import AuthModal from './components/Authmodal.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import History from './components/History.jsx';
 
 function App() {
   const [authModalVisible, setAuthModalVisible] = useState(false);
@@ -39,6 +40,7 @@ function App() {
             // </ProtectedRoute>
           }
         />
+        <Route path="/history" element={<History />} />
       </Routes>
 
       <AuthModal
