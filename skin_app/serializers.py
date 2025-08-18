@@ -7,7 +7,7 @@ from.models import UserImage
 class UserdetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Userdetails
-        fields = ['username', 'email', 'password', 'phone']
+        fields = ['username', 'email', 'phone','password']
         extra_kwargs = {
             'password': {'write_only': True},
         }
@@ -22,10 +22,14 @@ class UserdetailsSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Password must be at least 6 characters long.")
         return value
     
+
     def create(self, validated_data):
-        # Hash the password before saving
-        validated_data['password'] = make_password(validated_data['password'])
-        return super().create(validated_data)
+        password = validated_data.pop('password', None)  # ✅ safer than direct index
+        user = Userdetails(**validated_data)
+        if password:
+            user.password = make_password(password)  # ✅ hash
+        user.save()
+        return user
     
     def update(self, instance, validated_data):
         # Hash the password if it's being updated

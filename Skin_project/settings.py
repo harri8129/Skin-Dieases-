@@ -9,14 +9,11 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
-from pathlib import Path
 import os
+from pathlib import Path
 from dotenv import load_dotenv
+from decouple import config
 
-load_dotenv() 
-
-GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -85,20 +82,31 @@ WSGI_APPLICATION = 'Skin_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'system',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='5432'),
     }
+
 }
 
-# CORS settings
+# --- CORS ---
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite default
-
+    "http://localhost:5173",  # React dev
 ]
+CORS_ALLOW_CREDENTIALS = True
 
+# --- Sessions ---
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SESSION_COOKIE_NAME = "sessionid"
+SESSION_COOKIE_SAMESITE = "None"   # <-- must be Python None, not "None"
+SESSION_COOKIE_SECURE = False    # ok for localhost (set True in prod with HTTPS)
+
+# --- CSRF ---
+CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
+CSRF_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SECURE = False
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
