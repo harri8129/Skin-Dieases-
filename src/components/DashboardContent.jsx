@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect,useState } from 'react';
 
 const DashboardContent = () => {
-  const user = JSON.parse(localStorage.getItem('user')) || { username: 'User', id: null };
+  // const user = JSON.parse(localStorage.getItem('user')) || { username: 'User', id: null };
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState('');
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -10,7 +10,12 @@ const DashboardContent = () => {
   const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
   const [llmDetails, setLlmDetails] = useState(null);
   const [isLoadingLLM, setIsLoadingLLM] = useState(false);
-  
+  // const [user, setUser] = useState(null);
+
+  // useEffect(() => {
+  //   const storedUser = JSON.parse(sessionStorage.getItem("user") || "null");
+  //   setUser(storedUser);
+  // }, []);
 
 
   const handleFileChange = (e) => {
@@ -90,9 +95,9 @@ const DashboardContent = () => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">
-         Welcome, {user.username}
-      </h1>
+      {/* <h1 className="text-3xl font-bold text-gray-800 mb-4">
+         {user ? `Welcome, ${user.username}` : "Welcome, Guest"}
+      </h1> */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg p-6 shadow">

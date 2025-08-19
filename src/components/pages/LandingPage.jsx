@@ -34,20 +34,6 @@ function LandingPage() {
               Get instant, accurate skin disease analysis using advanced artificial intelligence. 
               Upload a photo and receive detailed reports within seconds.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={handleGetStarted}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
-              >
-                Get Started Free
-              </button>
-              <button
-                onClick={handleLearnMore}
-                className="border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200"
-              >
-                Learn More
-              </button>
-            </div>
           </div>
         </div>
       </div>

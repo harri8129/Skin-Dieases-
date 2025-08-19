@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-const ProtectedRoute = ({ children, triggerLoginModal }) => {
-  const isAuthenticated = !!localStorage.getItem('token');
-  const [shouldRender, setShouldRender] = useState(isAuthenticated);
+const ProtectedRoute = ({ children, triggerLoginModal, authChanged }) => {
+  const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
+    const isAuthenticated = !!localStorage.getItem('token');
+
     if (!isAuthenticated) {
       if (typeof triggerLoginModal === 'function') {
         triggerLoginModal();
@@ -13,7 +14,7 @@ const ProtectedRoute = ({ children, triggerLoginModal }) => {
     } else {
       setShouldRender(true);
     }
-  }, [isAuthenticated, triggerLoginModal]);
+  }, [authChanged, triggerLoginModal]); // listen for authChanged updates
 
   return shouldRender ? children : null;
 };

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button, Row, Col, Spin, message } from "antd";
+import { Table, Spin, message, Button, Image } from "antd";
+import { FileTextOutlined } from "@ant-design/icons";
 
 export default function HistoryPage() {
   const [history, setHistory] = useState([]);
@@ -50,68 +51,78 @@ export default function HistoryPage() {
     message.success("Report generated successfully!");
   };
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center mt-10">
-        <Spin size="large" />
-      </div>
-    );
+  const columns = [
+    {
+      title: "Image",
+      dataIndex: "image_url",
+      key: "image",
+      render: (url) => <Image src={url} alt="Skin" width={60} height={60} />,
+    },
+    {
+      title: "Prediction",
+      dataIndex: "predicted_disease",
+      key: "prediction",
+    },
+    {
+      title: "Confidence",
+      dataIndex: "predicted_confidence",
+      key: "confidence",
+      render: (value) => `${(value * 100).toFixed(2)}%`,
+    },
+    {
+      title: "Date",
+      dataIndex: "uploaded_at",
+      key: "date",
+      render: (date) => new Date(date).toLocaleString(),
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <Button
+          type="primary"
+          icon={<FileTextOutlined />}
+          onClick={() => handleGenerateReport(record)}
+        >
+          Generate Report
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">📜 History</h1>
 
-      {history.length === 0 ? (
-        <p>No history available.</p>
+      {loading ? (
+        <div className="flex justify-center items-center mt-10">
+          <Spin size="large" />
+        </div>
       ) : (
-        <Row gutter={[16, 16]}>
-          {history.map((item) => (
-            <Col xs={24} sm={12} lg={8} key={item.id}>
-              <Card
-                hoverable
-                cover={
-                  <img
-                    alt="Skin upload"
-                    src={item.image_url}
-                    className="h-56 object-cover"
-                  />
-                }
-                actions={[
-                  <Button
-                    type="primary"
-                    onClick={() => handleGenerateReport(item)}
-                    block
-                  >
-                    📑 Generate Report
-                  </Button>,
-                ]}
-              >
-                <h3 className="font-semibold text-lg">
-                  🦠 {item.predicted_disease}
-                </h3>
+        <Table
+          rowKey="id"
+          columns={columns}
+          dataSource={history}
+          expandable={{
+            expandedRowRender: (record) => (
+              <div className="p-4">
+                <h3 className="font-semibold mb-2">Detailed Report</h3>
                 <p>
-                  <strong>Confidence:</strong>{" "}
-                  {(item.predicted_confidence * 100).toFixed(2)}%
+                  <strong>Symptoms:</strong> {record.symptoms || "N/A"}
                 </p>
                 <p>
-                  <strong>Symptoms:</strong> {item.symptoms || "N/A"}
+                  <strong>Remedies:</strong> {record.remedies || "N/A"}
                 </p>
                 <p>
-                  <strong>Remedies:</strong> {item.remedies || "N/A"}
+                  <strong>Cure:</strong> {record.cure || "N/A"}
                 </p>
                 <p>
-                  <strong>Cure:</strong> {item.cure || "N/A"}
+                  <strong>Prevention:</strong> {record.prevention || "N/A"}
                 </p>
-                <p>
-                  <strong>Prevention:</strong> {item.prevention || "N/A"}
-                </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  📅 {new Date(item.uploaded_at).toLocaleString()}
-                </p>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+              </div>
+            ),
+          }}
+        />
       )}
     </div>
   );

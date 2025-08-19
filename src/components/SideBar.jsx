@@ -12,9 +12,9 @@ const Sidebar = () => {
 
   const menuItems = [
     { name: 'Home', icon: <Home size={20} />, path: '/dashboard' },
-    { name: 'History', icon: <History size={20} />, path: '/history' },
+    { name: 'History', icon: <History size={20} />, path: '/dashboard/history' }, // ✅ nested path
   ];
-
+  
   return (
     <div className="h-screen w-64 bg-white shadow-lg fixed top-0 left-0 flex flex-col">
       <div className="p-6 text-2xl font-bold text-blue-600 border-b">
