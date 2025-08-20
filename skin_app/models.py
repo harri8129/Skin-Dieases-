@@ -1,8 +1,5 @@
 from django.db import models
 
-
-# Create your models here.
-
 # model for storing user details
 class Userdetails(models.Model):
     username = models.CharField(max_length=50, unique=True)

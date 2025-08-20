@@ -14,6 +14,9 @@ import json
 import logging
 from .helpers.llm_helper import generate_disease_report
 import google.generativeai as genai
+from .utils.pdf_generator import generate_pdf_report 
+from django.http import FileResponse
+
 
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -66,6 +69,22 @@ class UserdetailsViewSet(viewsets.ModelViewSet):
             }
         }, status=status.HTTP_200_OK)
 
+    # ✅ Check if user is authenticated (for ProtectedRoute)
+    @action(detail=False, methods=['get'], url_path='check-auth')
+    def check_auth(self, request):
+        user_id = request.session.get('user_id')
+        if user_id:
+            user = get_object_or_404(Userdetails, id=user_id)
+            return Response({
+                'authenticated': True,
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                }
+            }, status=status.HTTP_200_OK)
+        return Response({'authenticated': False}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 # ✅ Upload image, predict disease & history
 class UserImageViewSet(viewsets.ModelViewSet):
@@ -115,6 +134,28 @@ class UserImageViewSet(viewsets.ModelViewSet):
         user_images = UserImage.objects.filter(user_id=user_id).order_by('-uploaded_at')
         serializer = self.get_serializer(user_images, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# ✅ NEW: Download PDF Report
+    @action(detail=True, methods=['get'], url_path='download-report')
+    def download_report(self, request, pk=None):
+        user_id = request.session.get('user_id')
+        if not user_id:
+            return Response({'error': 'You must be logged in'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        user_image = get_object_or_404(UserImage, id=pk, user_id=user_id)
+
+        buffer = generate_pdf_report(
+            user_name=user_image.user.username,
+            disease_name=user_image.predicted_disease or "Not Available",
+            symptoms=user_image.symptoms or "Not Available",
+            prevention=user_image.prevention or "Not Available",
+            remedies=user_image.remedies or "Not Available",
+            cure=user_image.cure or "Not Available",
+            image_path=user_image.image.path if user_image.image else None
+        )
+
+        return FileResponse(buffer, as_attachment=True, filename=f"Skin_Report_{pk}.pdf")
 
 
 # ✅ Generate LLM disease info
