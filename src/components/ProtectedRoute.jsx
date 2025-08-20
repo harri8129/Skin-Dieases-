@@ -4,17 +4,27 @@ const ProtectedRoute = ({ children, triggerLoginModal, authChanged }) => {
   const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
-    const isAuthenticated = !!localStorage.getItem('token');
-
-    if (!isAuthenticated) {
-      if (typeof triggerLoginModal === 'function') {
-        triggerLoginModal();
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/userdetails/check-auth/", {
+          credentials: "include" // send cookie
+        });
+        if (res.ok) {
+          setShouldRender(true);
+        } else {
+          if (typeof triggerLoginModal === "function") {
+            triggerLoginModal();
+          }
+          setShouldRender(false);
+        }
+      } catch (err) {
+        console.error("Auth check failed", err);
+        setShouldRender(false);
       }
-      setShouldRender(false);
-    } else {
-      setShouldRender(true);
-    }
-  }, [authChanged, triggerLoginModal]); // listen for authChanged updates
+    };
+
+    checkAuth();
+  }, [authChanged, triggerLoginModal]);
 
   return shouldRender ? children : null;
 };

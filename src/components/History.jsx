@@ -26,29 +26,31 @@ export default function HistoryPage() {
       });
   }, []);
 
-  const handleGenerateReport = (item) => {
-    const reportData = `
-      📝 Skin Disease Report
-
-      📌 Disease: ${item.predicted_disease}
-      🔢 Confidence: ${(item.predicted_confidence * 100).toFixed(2)}%
-      🧾 Symptoms: ${item.symptoms || "N/A"}
-      💊 Remedies: ${item.remedies || "N/A"}
-      🩺 Cure: ${item.cure || "N/A"}
-      🛡 Prevention: ${item.prevention || "N/A"}
-
-      📅 Uploaded at: ${new Date(item.uploaded_at).toLocaleString()}
-    `;
-
-    const blob = new Blob([reportData], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `report_${item.id}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-
-    message.success("Report generated successfully!");
+  // ✅ Call Django PDF endpoint
+  const handleDownloadReport = (item) => {
+    fetch(`http://localhost:8000/api/userimages/${item.id}/download-report/`, {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to download report");
+        return res.blob();
+      })
+      .then((blob) => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Skin_Report_${item.id}.pdf`; // ✅ PDF file
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        message.success("Report downloaded successfully!");
+      })
+      .catch((err) => {
+        console.error(err);
+        message.error("Error downloading report");
+      });
   };
 
   const columns = [
@@ -82,9 +84,9 @@ export default function HistoryPage() {
         <Button
           type="primary"
           icon={<FileTextOutlined />}
-          onClick={() => handleGenerateReport(record)}
+          onClick={() => handleDownloadReport(record)}
         >
-          Generate Report
+          Download Report
         </Button>
       ),
     },
