@@ -3,7 +3,7 @@
 This project is split into two parts:
 
 - *Backend* (backend/) → Django + LLM integration + PostgreSQL  
-- *Frontend* (frontend/) → React/Vue/Next (depending on your stack)  
+- *Frontend* (frontend/) → React
 
 ---
 
