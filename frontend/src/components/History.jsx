@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Table, Spin, message, Button, Image } from "antd";
 import { FileTextOutlined } from "@ant-design/icons";
+import api, { getAccessToken } from '../utils/api';
 
 export default function HistoryPage() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/userimages/history/", {
-      method: "GET",
-      credentials: "include", // ✅ keep session cookie
-    })
+    // Use the API utility with automatic token handling
+    api.get('/userimages/history/')
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch history");
         return res.json();
@@ -26,11 +25,15 @@ export default function HistoryPage() {
       });
   }, []);
 
-  // ✅ Call Django PDF endpoint
+  // Download PDF report using the API utility
   const handleDownloadReport = (item) => {
+    const accessToken = getAccessToken();
+    
     fetch(`http://localhost:8000/api/userimages/${item.id}/download-report/`, {
       method: "GET",
-      credentials: "include",
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
     })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to download report");
@@ -40,7 +43,7 @@ export default function HistoryPage() {
         const url = window.URL.createObjectURL(new Blob([blob]));
         const a = document.createElement("a");
         a.href = url;
-        a.download = `Skin_Report_${item.id}.pdf`; // ✅ PDF file
+        a.download = `Skin_Report_${item.id}.pdf`; // PDF file
         document.body.appendChild(a);
         a.click();
         a.remove();

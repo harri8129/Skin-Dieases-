@@ -7,7 +7,7 @@ import AuthModal from './components/Authmodal.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// ✅ import the child components
+// import the child components
 import DashboardContent from './components/DashboardContent.jsx';
 import History from './components/History.jsx';
 
@@ -25,8 +25,11 @@ function App() {
     setAuthModalVisible(false);
   };
 
-  const handleAuthSuccess = (type, userData) => {
-    localStorage.setItem('user', JSON.stringify(userData.user));
+  const handleAuthSuccess = (type, data) => {
+    // For JWT, user data is in the data object (from login response)
+    if (type === 'login' && data.user) {
+      localStorage.setItem('user', JSON.stringify(data.user));
+    }
     setAuthChanged(prev => prev + 1);
     setAuthModalVisible(false);
   };
@@ -42,13 +45,13 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute triggerLoginModal={showLoginModal} authChanged={authChanged}>
-              <Dashboard />   {/* ✅ Sidebar + layout wrapper */}
+              <Dashboard />
             </ProtectedRoute>
           }
         >
           {/* Nested routes inside Dashboard */}
-          <Route index element={<DashboardContent />} />   {/* /dashboard → DashboardContent */}
-          <Route path="history" element={<History />} />   {/* /dashboard/history → History */}
+          <Route index element={<DashboardContent />} />
+          <Route path="history" element={<History />} />
         </Route>
       </Routes>
 

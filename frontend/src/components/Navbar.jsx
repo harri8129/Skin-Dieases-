@@ -1,24 +1,32 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import AuthModal from './Authmodal';
+import { getAccessToken, clearTokens } from '../utils/api';
 
 function Navbar() {
   const navigate = useNavigate();
   const [authMode, setAuthMode] = useState(null); // 'login' or 'register'
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
+  const [isLoggedIn, setIsLoggedIn] = useState(!!getAccessToken());
 
   useEffect(() => {
-    // Listen for login/logout changes (optional: use a global state or event)
-    const handleStorage = () => setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
+    // Check login status whenever authMode changes or on mount
+    const checkAuth = () => {
+      setIsLoggedIn(!!getAccessToken());
+    };
+    
+    checkAuth();
+    
+    // Listen for storage changes
+    const handleStorage = () => checkAuth();
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
-  }, []);
+  }, [authMode]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('user');
+  const handleLogout = async () => {
+    // Clear tokens from storage
+    clearTokens();
     setIsLoggedIn(false);
-    navigate('/dashboard');
+    navigate('/');
   };
 
   return (
@@ -37,26 +45,6 @@ function Navbar() {
                 </h1>
               </div>
             </div>
-
-            {/* Navigation Links */}
-            {/* <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-8">
-                <button
-                  onClick={() => navigate('/')}
-                  className="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                >
-                  Home
-                </button>
-                {isLoggedIn && (
-                  <button
-                    onClick={() => navigate('/history')}
-                    className="text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-                  >
-                    History
-                  </button>
-                )}
-              </div>
-            </div> */}
 
             {/* Auth Buttons */}
             <div className="flex items-center space-x-3">

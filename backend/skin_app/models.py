@@ -7,6 +7,33 @@ class Userdetails(models.Model):
     password = models.CharField(max_length=128)
     phone = models.CharField(max_length=15)
     
+    # Required for Django authentication
+    @property
+    def is_authenticated(self):
+        return True
+    
+    @property
+    def is_anonymous(self):
+        return False
+    
+    @property
+    def is_active(self):
+        return True
+    
+    @property
+    def is_staff(self):
+        return False
+    
+    @property
+    def is_superuser(self):
+        return False
+    
+    def has_perm(self, perm, obj=None):
+        return False
+    
+    def has_module_perms(self, app_label):
+        return False
+    
     def __str__(self):
         return self.username
 
@@ -26,5 +53,3 @@ class UserImage(models.Model):
 
     def __str__(self):
         return f"Image by {self.user.username} at {self.uploaded_at}"
-
-

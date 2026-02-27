@@ -1,18 +1,19 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Upload, History, BarChart, HelpCircle, LogOut } from 'lucide-react';
+import { Home, History, LogOut } from 'lucide-react';
+import { clearTokens } from '../utils/api';
 
 const Sidebar = () => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const handleLogout = async () => {
+    // Clear tokens from storage
+    clearTokens();
     navigate("/");
   };
 
   const menuItems = [
     { name: 'Home', icon: <Home size={20} />, path: '/dashboard' },
-    { name: 'History', icon: <History size={20} />, path: '/dashboard/history' }, // ✅ nested path
+    { name: 'History', icon: <History size={20} />, path: '/dashboard/history' },
   ];
   
   return (

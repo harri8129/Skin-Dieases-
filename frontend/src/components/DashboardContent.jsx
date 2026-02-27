@@ -1,4 +1,5 @@
 import React, { useEffect,useState } from 'react';
+import api from '../utils/api';
 
 const DashboardContent = () => {
   // const user = JSON.parse(localStorage.getItem('user')) || { username: 'User', id: null };
@@ -37,14 +38,11 @@ const DashboardContent = () => {
     }
   
     const formData = new FormData();
-    formData.append('image', selectedFile); // ✅ only send the image
+    formData.append('image', selectedFile); // only send the image
   
     try {
-      const response = await fetch('http://localhost:8000/api/userimages/upload/', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include', // ✅ send session cookie
-      });
+      // Use the new API utility with automatic token handling
+      const response = await api.post('/userimages/upload/', formData);
   
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
@@ -65,13 +63,7 @@ const DashboardContent = () => {
   
           // Call LLM info generator
           setIsLoadingLLM(true);
-          const llmRes = await fetch(
-            `http://localhost:8000/api/disease-info/${uploadedImageId}/generate-info/`,
-            {
-              method: 'POST',
-              credentials: 'include', // ✅ send cookie again
-            }
-          );
+          const llmRes = await api.post(`/disease-info/${uploadedImageId}/generate-info/`);
   
           const llmData = await llmRes.json();
           setIsLoadingLLM(false);
@@ -111,7 +103,7 @@ const DashboardContent = () => {
             className="mb-4"
           />
 
-          {/* ✅ Image Preview */}
+          {/* Image Preview */}
           {previewUrl && (
             <div className="mb-4">
               <p className="text-sm text-gray-600">Image Preview:</p>
