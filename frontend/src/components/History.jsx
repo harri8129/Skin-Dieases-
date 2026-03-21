@@ -61,7 +61,13 @@ export default function HistoryPage() {
       title: "Image",
       dataIndex: "image_url",
       key: "image",
-      render: (url) => <Image src={url} alt="Skin" width={60} height={60} />,
+      render: (url, record) => {
+        let finalUrl = url || record.image;
+        if (finalUrl && finalUrl.startsWith('/')) {
+          finalUrl = `http://localhost:8000${finalUrl}`;
+        }
+        return <Image src={finalUrl} alt="Skin" width={60} height={60} />;
+      },
     },
     {
       title: "Prediction",

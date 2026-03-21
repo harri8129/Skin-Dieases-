@@ -59,7 +59,12 @@ const DashboardContent = () => {
   
           setPrediction(disease || 'Prediction not available');
           setConfidence(conf !== undefined ? conf.toFixed(2) : null);
-          setUploadedImageUrl(data.image?.image || null);
+          
+          let imgUrl = data.image?.image_url || data.image?.image || null;
+          if (imgUrl && imgUrl.startsWith('/')) {
+            imgUrl = `http://localhost:8000${imgUrl}`;
+          }
+          setUploadedImageUrl(imgUrl);
   
           // Call LLM info generator
           setIsLoadingLLM(true);
